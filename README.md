@@ -70,3 +70,86 @@ events, whereas resilience focuses on low-probability, high-impact (LPHI) events
 - What's the timeframe for which we need to predict? Days, weeks? At the time of the weather impact itself?
 - What causes a power outage irt weather? What causes extreme weather events?
   - Causally: extreme weather events -> extreme weather -> power outage
+
+# Loading data
+
+Im using duckdb to ingest the csvs and speed things up.
+
+# Explorative Data Analysis
+
+### Findings:
+- `customers_out`: this can contain 0's and nulls, indicating that there would either be data missing or no apparent outage
+- 'run_start_time`: I feel there could be missing data around new years for some counties. In the top 10 in terms of duration, I see two counties that have a start time on the 1st of January at `2022-01-01 00:00:00`. Need to check if thats a coincidence.
+
+| county      | state      | customers_out | run_start_time      |
+| ----------- | ---------- | ------------- | ------------------- |
+| Los Angeles | California | 5894          | 2021-12-31 00:00:00 |
+| Los Angeles | California | 6677          | 2022-01-01 00:00:00 |
+
+
+### Duration Analysis:
+
+1. Find the longest consecutive outage in a single county (tracking same customer count)
+
+| state         | county       | start_time          | end_time            | min_customers | max_customers | avg_customers | duration          |
+| :------------ | :----------- | :------------------ | :------------------ | ------------: | ------------: | ------------: | :---------------- |
+| Massachusetts | Hampden      | 2022-01-01 00:00:00 | 2022-08-23 18:30:00 |             1 |         23142 |       215.161 | 234 days 18:30:00 |
+| California    | Los Angeles  | 2022-05-31 13:30:00 | 2022-10-18 23:00:00 |             1 |         93099 |       2027.89 | 140 days 09:30:00 |
+| California    | Los Angeles  | 2020-07-12 11:15:00 | 2020-10-20 10:45:00 |             1 |         65931 |       2349.69 | 99 days 23:30:00  |
+| New Jersey    | Morris       | 2022-05-15 11:45:00 | 2022-08-19 17:15:00 |             4 |         27353 |       132.137 | 96 days 05:30:00  |
+| Arkansas      | Arkansas     | 2022-05-07 05:15:00 | 2022-08-02 17:45:00 |             1 |          1787 |       24.6571 | 87 days 12:30:00  |
+| California    | Los Angeles  | 2022-01-01 00:00:00 | 2022-03-25 11:00:00 |             1 |         35499 |       1775.54 | 83 days 11:00:00  |
+| Texas         | Harris       | 2019-07-27 19:00:00 | 2019-10-19 05:45:00 |             1 |         36534 |       1621.72 | 83 days 10:45:00  |
+| California    | Los Angeles  | 2022-10-19 00:45:00 | 2023-01-08 15:00:00 |             1 |         25236 |        1914.1 | 81 days 14:15:00  |
+| Louisiana     | St. Mary     | 2019-07-27 19:00:00 | 2019-10-08 20:15:00 |             4 |           387 |       9.63202 | 73 days 01:15:00  |
+| Pennsylvania  | Philadelphia | 2022-04-20 00:00:00 | 2022-06-27 07:45:00 |             4 |          4988 |       105.379 | 68 days 07:45:00  |
+
+2. Find the median duration of outages per county
+3. Identify counties that frequently have outages lasting more than 2 hours
+4. Calculate the average duration of outages across different states
+
+### Geographic Hotspots:
+
+1. Find the top 5 states with most outage events
+2. Find the top 10 counties with most frequent outages
+3. Identify states where multiple counties have simultaneous outages
+4. Calculate the percentage of counties affected within each state
+
+### Scale Impact:
+
+1. Find incidents where over 1000 customers were affected
+2. Rank counties by total customer-hours of outages
+3. Identify the maximum number of customers affected in a single outage
+4. Calculate average number of customers affected per state
+
+### Time Patterns:
+
+1. Find the hour of day with most outage starts
+2. Identify which day of week has most outages
+3. Calculate percentage of outages that start during night hours (10PM-6AM)
+4. Find months with highest outage frequencies
+
+### Pattern Analysis:
+
+1. Identify counties that have regular patterns (same time each day)
+2. Find counties with "flickering" patterns (multiple short outages)
+3. Calculate the average time between repeated outages in same county
+4. Identify if specific counties always have outages of similar size
+
+# Evaluation Framework
+
+### Metrics
+
+Some options:
+- Event classification (rare events)
+- Lead time accuracy
+- Severity prediction (customer impact)
+- Location precision
+
+### Baseline
+
+Some options:
+- Historical average for the same period: over all 10 years
+- Seasonal Naive: from last year, month, or week? Or combined?
+- Persistence model: most recent value
+
