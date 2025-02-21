@@ -79,7 +79,7 @@ Im using duckdb to ingest the csvs and speed things up.
 
 ### Findings:
 - `customers_out`: this can contain 0's and nulls, indicating that there would either be data missing or no apparent outage
-- 'run_start_time`: I feel there could be missing data around new years for some counties. In the top 10 in terms of duration, I see two counties that have a start time on the 1st of January at `2022-01-01 00:00:00`. Need to check if thats a coincidence.
+- `run_start_time`: I feel there could be missing data around new years for some counties. In the top 10 in terms of duration, I see two counties that have a start time on the 1st of January at `2022-01-01 00:00:00`. Need to check if thats a coincidence.
 
 | county      | state      | customers_out | run_start_time      |
 | ----------- | ---------- | ------------- | ------------------- |
