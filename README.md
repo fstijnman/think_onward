@@ -70,6 +70,7 @@ events, whereas resilience focuses on low-probability, high-impact (LPHI) events
 - What's the timeframe for which we need to predict? Days, weeks? At the time of the weather impact itself?
 - What causes a power outage irt weather? What causes extreme weather events?
   - Causally: extreme weather events -> extreme weather -> power outage
+- I found this in a [description](https://smc-datachallenge.ornl.gov/eagle/) of Eaglei data: *This dataset has been collected from utility’s public outage maps using an ETL process. Note that the number of “customers” does not necessarily equate to the number of people affected, as a “customer” reported by a utility could be one meter, one building, etc. Also included is the coverage of each state for each year included in the dataset.*
 
 # Loading data
 
@@ -141,10 +142,10 @@ Im using duckdb to ingest the csvs and speed things up.
 ### Metrics
 
 Some options:
-- Event classification (rare events)
-- Lead time accuracy
-- Severity prediction (customer impact)
-- Location precision
+- Event classification (if there will be an outage)
+- Lead time accuracy (how long will the outage last)
+- Severity prediction (how many people are affected by the outage)
+- Location precision (where exactly is the outage) < I expect that we would already make a per state prediction
 
 ### Baseline
 

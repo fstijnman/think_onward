@@ -87,7 +87,7 @@ def main(db_path):
     outage_summary = process_all_data(db_path)
 
     with duckdb.connect(database=db_path) as conn:
-        conn.register("outage_summary", outage_summary)
+        conn.sql("CREATE TABLE outage_summary AS SELECT * FROM outage_summary")
 
 
 if __name__ == "__main__":
