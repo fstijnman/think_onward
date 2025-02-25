@@ -1,5 +1,6 @@
 import duckdb
 import pandas as pd
+from loguru import logger
 
 
 def process_state_county(conn, state, county):
@@ -73,7 +74,9 @@ def process_all_data(db_path):
         total_pairs = len(pairs)
 
         for idx, (_, row) in enumerate(pairs.iterrows(), 1):
-            print(f"Processing {row['state']}, {row['county']} ({idx}/{total_pairs})")
+            logger.info(
+                f"Processing {row['state']}, {row['county']} ({idx}/{total_pairs})"
+            )
             summary = process_state_county(conn, row["state"], row["county"])
             results.append(summary)
 
@@ -85,6 +88,20 @@ def process_all_data(db_path):
 
 def main(db_path):
     outage_summary = process_all_data(db_path)
+    outage_summary["minutes"] = outage_summary["duration"].dt.components["minutes"]
+
+    outage_summary = outage_summary[
+        [
+            "state",
+            "county",
+            "start_time",
+            "end_time",
+            "min_customers",
+            "max_customers",
+            "avg_customers",
+            "minutes",
+        ]
+    ].copy()
 
     with duckdb.connect(database=db_path) as conn:
         conn.sql("CREATE TABLE outage_summary AS SELECT * FROM outage_summary")
